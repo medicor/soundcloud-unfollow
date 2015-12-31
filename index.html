@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Soundcloud unfollow</title>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="description" content="Unfollow Soundcloud users that don't follow you back." />
+	<meta name="author" content="Roger Salomonsson">
+	<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+	<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Roboto+Slab" />
+</head>
+
+<body>
+	<style type="text/css">
+		body {
+			margin: 0;
+			font-family: 'Roboto Slab', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+		}
+		
+		button {
+			font-family: inherit;
+		}
+		
+		#header {
+			color: #333;
+			background: #f9f9f9;
+			text-align: center;
+			width: 100%;
+			margin: auto;
+			padding: 0 0 16px 0;
+			position: fixed;
+			top: 0px;
+			z-index: 1;
+			box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.14), 0 1px 18px 0 rgba(0, 0, 0, 0.12), 0 3px 5px -1px rgba(0, 0, 0, 0.4);
+		}
+		
+		#header > h1 {
+			color: #e64a19;
+		}
+		#connect {
+			cursor: pointer;
+		}
+		
+		#content {
+			position: relative;
+			margin: auto;
+			max-width: 800px;
+			padding-top: 32px;
+		}
+		
+		#content > section {
+			padding: 16px;
+			margin-bottom: 16px;
+			border: 1px solid #ccc;
+			position: relative;
+			transition: opacity 0.5s ease;
+			opacity: 0;
+		}
+		
+		#content > section > .user {
+			position: absolute;
+			top: 1rem;
+			left: 8rem;
+			font-size: large;
+			color: #e64a19;
+		}
+		
+		#content > section > .info {
+			position: absolute;
+			top: 3rem;
+			left: 8rem;
+			font-style: italic;
+			font-size: small;
+		}
+		
+		#content > section > button {
+			position: absolute;
+			bottom: 1rem;
+			right: 1rem;
+			font-size: medium;
+		}
+	</style>
+	<script src="//cdn.polyfill.io/v2/polyfill.min.js"></script>
+	<script src="https://connect.soundcloud.com/sdk/sdk-3.0.0.js"></script>
+	<script>
+		/*global SC */
+		/* printf for JavaScript (since Template strings are not widely supported). */
+		/* See http://stackoverflow.com/questions/610406/javascript-equivalent-to-printf-string-format */
+		if (!String.prototype.format) {
+			String.prototype.format = function() {
+				var args = arguments;
+				return this.replace(/{(\d+)}/g, function(match, number) {
+					return typeof args[number] != 'undefined' ? args[number] : match;
+				});
+			};
+		}
+		document.addEventListener("DOMContentLoaded", function() {
+			SC.initialize({
+				client_id: '39a7e5368d42f7d4c46747c6d02455d7',
+				redirect_uri: 'http://cloud.medicor.se/dreamstream/callback.html'
+			});
+			document.querySelector('#connect').addEventListener('click', function() {
+				var result = {};
+
+				SC.connect()
+					.then(function() {
+						return SC.get('/me/followers', {
+							limit: 500
+						}).then(function(aResult) {
+							result.followers = aResult.collection;
+						});
+					})
+					.then(function() {
+						return SC.get('/me/followings', {
+							limit: 500
+						}).then(function(aResult) {
+							result.followings = aResult.collection;
+						});
+					})
+					.then(function() {
+						var content = document.querySelector('#content');
+
+						/* Set top of container since header is fixed and "out of flow". */
+						content.style.top = document.querySelector('#header').clientHeight + "px";
+						while (content.firstChild) {
+							content.removeChild(content.firstChild);
+						}
+						result.danglers = result.followings.filter(function(aFollowing) {
+							return result.followers.filter(function(aFollower) {
+								return aFollowing.id === aFollower.id;
+							}).length === 0;
+						});
+						result.danglers.sort(function(a, b) {
+							if (a.followers_count > b.followers_count) {
+								return +1;
+							}
+							if (a.followers_count < b.followers_count) {
+								return -1;
+							}
+							return 0;
+						});
+						result.danglers.forEach(function(aDangler) {
+							var ed = document.createElement('section'),
+								ts = '<a href="{1}" target="_blank"><img src="{2}"></a>' +
+								'<div class="user">{3}</div>' +
+								'<div class="info">{4} followers and<br>{5} followings.</div>' +
+								'<button id="{0}">Unfollow</button>';
+
+							ed.innerHTML = ts.format(
+								aDangler.id,
+								aDangler.permalink_url,
+								aDangler.avatar_url,
+								aDangler.username,
+								aDangler.followers_count.toLocaleString(),
+								aDangler.followings_count.toLocaleString()
+							);
+							content.appendChild(ed);
+							setTimeout(function() {
+								ed.style.opacity = 1.0;
+							}, 100);
+
+						});
+						Array.prototype.forEach.call(document.querySelectorAll('#content > section > button'), function(anElement) {
+							anElement.addEventListener('click', function(anEvent) {
+								var bt = anEvent.srcElement,
+									pe = bt.parentNode;
+
+								pe.style.opacity = 0;
+								setTimeout(function() {
+									SC.delete('/me/followings/{0}'.format(bt.id)).then(function() {
+										pe.parentNode.removeChild(pe);
+									});
+								}, 500);
+							});
+						});
+					});
+			});
+		});
+	</script>
+	<header id="header">
+		<h1>Soundcloud Unfollow</h1>
+		<h3>List users that you follow but don't follow you back.</h3>
+		<img id="connect" src="http://connect.soundcloud.com/2/btn-connect-sc-l.png">
+	</header>
+	<section id="content"></section>
+</body>
+
+</html>
