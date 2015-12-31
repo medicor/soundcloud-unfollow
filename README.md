@@ -1,6 +1,5 @@
 # Soundcloud Unfollow
-A simple app that let you connect your Soundcloud account and view all users that you are following that don't follow you back. 
-There is also an "unfollow" button.
+A simple app that let you connect your Soundcloud account and view all users that you are following but don't follow you back, with an option to unfollow these users. 
 
 Goal was to build it without frameworks ([Web platform](https://www.webplatform.org/) only), 
 although [Bliss](http://blissfuljs.com/) would have been a more pleasant experience. 
