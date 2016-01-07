@@ -8,6 +8,8 @@
 	<meta name="description" content="Unfollow Soundcloud users that don't follow you back." />
 	<meta name="author" content="Roger Salomonsson">
 	<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+	<meta name="theme-color" content="#e64a19">
+	<meta name="application-name" content="Soundcloud Unfollow">
 	<meta name="google-site-verification" content="3yEZRHo7iR6Ee9xjOmdQYxlEuCYDjUZXvhHKuvSN39U" />
 	<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Roboto+Slab" />
 	<script>
@@ -32,6 +34,7 @@
 		body {
 			margin: 0;
 			font-family: 'Roboto Slab', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+			overflow-y: scroll;
 		}
 		
 		button {
@@ -43,16 +46,28 @@
 			background: #f9f9f9;
 			text-align: center;
 			width: 100%;
-			margin: auto;
-			padding: 0 0 16px 0;
+			height: 100%;
 			position: fixed;
 			top: 0px;
 			z-index: 1;
 			box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.14), 0 1px 18px 0 rgba(0, 0, 0, 0.12), 0 3px 5px -1px rgba(0, 0, 0, 0.4);
+			transition: height 0.6s cubic-bezier(.87,-.41,.19,1.44);
 		}
 		
-		#header > h1 {
+		#header > article {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+		}
+		
+		#header > article > .main {
 			color: #e64a19;
+			font-size: x-large;
+		}
+		
+		#header > article > .sub {
+			margin-bottom: 1em;
 		}
 		
 		#connect {
@@ -136,10 +151,12 @@
 						});
 					})
 					.then(function() {
-						var content = document.querySelector('#content');
+						var header  = document.querySelector('#header'), 
+							content = document.querySelector('#content');
 
+						header.style.height = '12rem';
 						/* Set top of container since header is fixed and "out of flow". */
-						content.style.top = document.querySelector('#header').clientHeight + "px";
+						content.style.top = '12rem'; //document.querySelector('#header').clientHeight + "px";
 						while (content.firstChild) {
 							content.removeChild(content.firstChild);
 						}
@@ -196,9 +213,11 @@
 		});
 	</script>
 	<header id="header">
-		<h1>Soundcloud Unfollow</h1>
-		<h3>List users that you follow but don't follow you back.</h3>
-		<img id="connect" src="http://connect.soundcloud.com/2/btn-connect-sc-l.png">
+		<article>
+			<div class="main">Soundcloud Unfollow</div>
+			<div class="sub">List users that you follow but don't follow you back.</div>
+			<img id="connect" src="http://connect.soundcloud.com/2/btn-connect-sc-l.png">
+		</article>
 	</header>
 	<section id="content"></section>
 </body>
