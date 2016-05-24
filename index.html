@@ -114,18 +114,18 @@
 		}
 	</style>
 	<script src="//cdn.polyfill.io/v2/polyfill.min.js"></script>
-	<script src="https://connect.soundcloud.com/sdk/sdk-3.0.0.js"></script>
+	<script src="sdk.js"></script>
 	<script>
 		/*global SC */
 		/* printf for JavaScript (since Template strings are not widely supported). */
 		/* See http://stackoverflow.com/questions/610406/javascript-equivalent-to-printf-string-format */
 		if (!String.prototype.format) {
-			String.prototype.format = function() {
+			 String.prototype.format = function() {
 				var args = arguments;
 				return this.replace(/{(\d+)}/g, function(match, number) {
 					return typeof args[number] != 'undefined' ? args[number] : match;
 				});
-			};
+			 };
 		}
 		document.addEventListener("DOMContentLoaded", function() {
 			SC.initialize({
@@ -197,7 +197,7 @@
 						});
 						Array.prototype.forEach.call(document.querySelectorAll('#content > section > button'), function(anElement) {
 							anElement.addEventListener('click', function(anEvent) {
-								var bt = anEvent.srcElement,
+								var bt = anEvent.target,
 									pe = bt.parentNode;
 
 								pe.style.opacity = 0;
