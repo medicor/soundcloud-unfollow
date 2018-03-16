@@ -36,11 +36,19 @@
 			font-family: 'Roboto Slab', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 			overflow-y: scroll;
 		}
-		
+
 		button {
 			font-family: inherit;
 		}
-		
+
+		a {
+			text-decoration: none;
+		}
+
+		a:hover {
+			text-decoration: underline;
+		}
+
 		#header {
 			color: #333;
 			background: #f9f9f9;
@@ -53,65 +61,66 @@
 			box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.14), 0 1px 18px 0 rgba(0, 0, 0, 0.12), 0 3px 5px -1px rgba(0, 0, 0, 0.4);
 			transition: height 0.6s cubic-bezier(.87,-.41,.19,1.44);
 		}
-		
+
 		#header > article {
-			position: absolute;
+			position: relative;
 			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
+			transform: translate(0%,-50%);
+			text-align: center;
 		}
-		
+
 		#header > article > .main {
 			color: #e64a19;
 			font-size: x-large;
 		}
-		
+
 		#header > article > .sub {
 			margin-bottom: 1em;
+			font-size: small;
 		}
-		
+
 		#connect {
 			cursor: pointer;
 		}
-		
+
 		#content {
 			position: relative;
 			margin: auto;
 			max-width: 800px;
 			padding-top: 32px;
 		}
-		
+
 		#content > section {
+			display: flex;
+			position: relative;
 			padding: 16px;
 			margin-bottom: 16px;
 			border: 1px solid #ccc;
-			position: relative;
 			transition: opacity 0.5s ease;
 			opacity: 0;
 		}
-		
-		#content > section > .user {
-			position: absolute;
-			top: 1rem;
-			left: 8rem;
+
+		.details {
+			margin-left: 1rem;
+		}
+
+		.user {
 			font-size: large;
 			color: #e64a19;
 		}
-		
-		#content > section > .info {
-			position: absolute;
-			top: 3rem;
-			left: 8rem;
+
+		.info {
 			font-style: italic;
 			font-size: small;
 		}
-		
-		#content > section > button {
+
+		.unfollow {
 			position: absolute;
 			bottom: 1rem;
 			right: 1rem;
 			font-size: medium;
 		}
+
 	</style>
 	<script src="//cdn.polyfill.io/v2/polyfill.min.js"></script>
 	<script src="sdk.js"></script>
@@ -138,25 +147,24 @@
 				SC.connect()
 					.then(function() {
 						return SC.get('/me/followers', {
-							limit: 500
 						}).then(function(aResult) {
 							result.followers = aResult.collection;
 						});
 					})
 					.then(function() {
 						return SC.get('/me/followings', {
-							limit: 500
 						}).then(function(aResult) {
 							result.followings = aResult.collection;
 						});
 					})
 					.then(function() {
-						var header  = document.querySelector('#header'), 
-							content = document.querySelector('#content');
+						var header  = document.querySelector('#header'),
+							content = document.querySelector('#content'),
+							connect = document.querySelector('#connect');
 
-						header.style.height = '12rem';
-						/* Set top of container since header is fixed and "out of flow". */
-						content.style.top = '12rem'; //document.querySelector('#header').clientHeight + "px";
+						connect.style.display = 'none';
+						header.style.height = '5rem';
+						content.style.top = '5rem'; /* Set top of container since header is fixed and "out of flow". */
 						while (content.firstChild) {
 							content.removeChild(content.firstChild);
 						}
@@ -176,10 +184,15 @@
 						});
 						result.danglers.forEach(function(aDangler) {
 							var ed = document.createElement('section'),
-								ts = '<a href="{1}" target="_blank"><img src="{2}"></a>' +
-								'<div class="user">{3}</div>' +
-								'<div class="info">{4} followers and<br>{5} followings.</div>' +
-								'<button id="{0}">Unfollow</button>';
+								ts = '' +
+									'<a href="{1}" target="_blank">' +
+										'<img src="{2}">' +
+									'</a>' +
+									'<article class="details">' +
+										'<a  href="{1}" target="_blank" class="user">{3}</a>' +
+										'<div class="info">{4} followers and<br>{5} followings.</div>' +
+									'</article>' +
+									'<button class="unfollow" id="{0}">Unfollow</button>';
 
 							ed.innerHTML = ts.format(
 								aDangler.id,
@@ -195,7 +208,7 @@
 							}, 100);
 
 						});
-						Array.prototype.forEach.call(document.querySelectorAll('#content > section > button'), function(anElement) {
+						Array.prototype.forEach.call(document.querySelectorAll('.unfollow'), function(anElement) {
 							anElement.addEventListener('click', function(anEvent) {
 								var bt = anEvent.target,
 									pe = bt.parentNode;
