@@ -142,20 +142,39 @@
 				redirect_uri: 'http://cloud.medicor.se/dreamstream/callback.html'
 			});
 			document.querySelector('#connect').addEventListener('click', function() {
-				var result = {};
+				var result = {},
+					getAll  = function(aURL) { // Multi-fetch a complete collection through SCs partitioning scheme.
+						var l = [],
+							x = function(u, p) {
+								SC.get(u, {
+									limit: 200, // Maximum number of fetchable items in a single call is 200.
+									linked_partitioning: 1
+								}).then(function(r) {
+									l = l.concat(r.collection);
+									if (r.next_href) {
+										x(r.next_href.replace(/^https\:\/\/api.soundcloud.com/,''), p);
+									} else {
+										p(l);
+									}
+								});
+							};
+
+						return new SC.Promise(function(aResolver) {
+							x(aURL, aResolver);
+						});
+					};
 
 				SC.connect()
 					.then(function() {
-						return SC.get('/me/followers', {
-						}).then(function(aResult) {
-							result.followers = aResult.collection;
+						return getAll('/me/followers').then(function(aResult) {
+							result.followers = aResult;
 						});
 					})
 					.then(function() {
-						return SC.get('/me/followings', {
-						}).then(function(aResult) {
-							result.followings = aResult.collection;
+						return getAll('/me/followings').then(function(aResult) {
+							result.followings = aResult;
 						});
+
 					})
 					.then(function() {
 						var header  = document.querySelector('#header'),
@@ -164,7 +183,7 @@
 
 						connect.style.display = 'none';
 						header.style.height = '5rem';
-						content.style.top = '5rem'; /* Set top of container since header is fixed and "out of flow". */
+						content.style.top = '5rem';
 						while (content.firstChild) {
 							content.removeChild(content.firstChild);
 						}
@@ -229,6 +248,7 @@
 		<article>
 			<div class="main">Soundcloud Unfollow</div>
 			<div class="sub">List users that you follow but don't follow you back.</div>
+			<!--<h1 style="color: red">Work in progress. Do not use until this message disappears.</h1>-->
 			<img id="connect" src="http://connect.soundcloud.com/2/btn-connect-sc-l.png">
 		</article>
 	</header>
