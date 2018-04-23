@@ -79,8 +79,18 @@
 			font-size: small;
 		}
 
+		#disclaimer {
+			font-size: small;
+			border: 1px solid #ffcdd2;
+			background-color: #ffebee;
+			padding: 10px;
+			margin: auto;
+			max-width: 480px;
+		}
+
 		#connect {
 			cursor: pointer;
+			margin-top: 10px;
 		}
 
 		#content {
@@ -177,12 +187,11 @@
 
 					})
 					.then(function() {
-						var header  = document.querySelector('#header'),
-							content = document.querySelector('#content'),
-							connect = document.querySelector('#connect');
+						var content = document.querySelector('#content');
 
-						connect.style.display = 'none';
-						header.style.height = '5rem';
+						document.querySelector('#connect').style.display = 'none';
+						document.querySelector('#disclaimer').style.display = 'none';
+						document.querySelector('#header').style.height = '5rem';
 						content.style.top = '5rem';
 						while (content.firstChild) {
 							content.removeChild(content.firstChild);
@@ -249,6 +258,13 @@
 			<div class="main">Soundcloud Unfollow</div>
 			<div class="sub">List users that you follow but don't follow you back.</div>
 			<!--<h1 style="color: red">Work in progress. Do not use until this message disappears.</h1>-->
+			<div class="box" id="disclaimer">
+				<strong>This website uses cookies</strong><br>
+				This site uses cookies to analyse traffic.
+				This information is shared with Google Analytics,
+				who may combine it with other information that they have collected from your use of their services.
+				You consent to our cookies if you continue to use this site.
+			</div>
 			<img id="connect" src="http://connect.soundcloud.com/2/btn-connect-sc-l.png">
 		</article>
 	</header>
